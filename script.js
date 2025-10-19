@@ -100,8 +100,10 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const imageName = item.username.toLowerCase().replace(/ /g, '-').replace(/\./g, '') + '.png';
 
+            // Linha de depuração para te ajudar a encontrar o erro dos escudos
+            console.log('Procurando pela imagem:', imageName); 
+
             let detalhesHTML = '';
-            // ### ALTERAÇÃO AQUI ###
             if (tipo === 'rodada') {
                 const pontosDaRodada = totalParticipantes - item.rank + 1;
                 detalhesHTML = `
