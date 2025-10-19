@@ -4,8 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const rankingTitle = document.getElementById('ranking-title');
 
     // Mude aqui o número total de rodadas que você já salvou
-    const TOTAL_RODADAS = 1; // Exemplo: se você já tem rodada-1.json e rodada-2.json
-
+    const TOTAL_RODADAS = 1; 
     let todosOsDadosDasRodadas = []; // Armazena os dados de todas as rodadas para o cálculo geral
 
     // Função para buscar os dados de todas as rodadas
