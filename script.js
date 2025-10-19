@@ -3,7 +3,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const botoesContainer = document.getElementById('botoes-rodadas');
     const rankingTitle = document.getElementById('ranking-title');
 
-    // Mude aqui o número total de rodadas que você já salvou
     const TOTAL_RODADAS = 1; 
 
     let todosOsDadosDasRodadas = [];
@@ -17,7 +16,6 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             todosOsDadosDasRodadas = await Promise.all(promessas);
             criarBotoes();
-            // Mostra a classificação geral por padrão ao carregar a página
             mostrarClassificacaoGeral(); 
         } catch (error) {
             rankingTitle.textContent = "Erro ao carregar dados das rodadas";
@@ -98,11 +96,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const itemDiv = document.createElement('div');
             itemDiv.className = 'ranking-item';
             
-            const imageName = item.username.toLowerCase().replace(/ /g, '-').replace(/\./g, '') + '.png';
-
-            // Linha de depuração para te ajudar a encontrar o erro dos escudos
-            console.log('Procurando pela imagem:', imageName); 
-
             let detalhesHTML = '';
             if (tipo === 'rodada') {
                 const pontosDaRodada = totalParticipantes - item.rank + 1;
@@ -122,7 +115,6 @@ document.addEventListener('DOMContentLoaded', () => {
             itemDiv.innerHTML = `
                 <div class="rank">${item.rank}º</div>
                 <div class="team-info">
-                    <img src="./imagens/${imageName}" alt="Escudo do ${item.username}" onerror="this.style.display='none'">
                     <span class="username">${item.username}</span>
                 </div>
                 ${detalhesHTML}
