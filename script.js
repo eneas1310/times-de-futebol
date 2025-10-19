@@ -5,9 +5,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Mude aqui o número total de rodadas que você já salvou
     const TOTAL_RODADAS = 1; 
-    let todosOsDadosDasRodadas = []; // Armazena os dados de todas as rodadas para o cálculo geral
 
-    // Função para buscar os dados de todas as rodadas
+    let todosOsDadosDasRodadas = [];
+
     async function carregarDadosDeTodasAsRodadas() {
         const promessas = [];
         for (let i = 1; i <= TOTAL_RODADAS; i++) {
@@ -17,24 +17,23 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             todosOsDadosDasRodadas = await Promise.all(promessas);
             criarBotoes();
+            // Mostra a classificação geral por padrão ao carregar a página
+            mostrarClassificacaoGeral(); 
         } catch (error) {
             rankingTitle.textContent = "Erro ao carregar dados das rodadas";
             container.innerHTML = '<p class="loading">Verifique se todos os arquivos .json das rodadas existem na pasta /rodadas/.</p>';
         }
     }
 
-    // Função para criar os botões na tela
     function criarBotoes() {
-        botoesContainer.innerHTML = ''; // Limpa botões existentes
+        botoesContainer.innerHTML = '';
         
-        // Botão para Classificação Geral
         const btnGeral = document.createElement('button');
         btnGeral.className = 'btn-rodada';
         btnGeral.textContent = 'Classificação Geral';
         btnGeral.onclick = () => mostrarClassificacaoGeral();
         botoesContainer.appendChild(btnGeral);
 
-        // Botões para cada rodada
         for (let i = 1; i <= TOTAL_RODADAS; i++) {
             const btn = document.createElement('button');
             btn.className = 'btn-rodada';
@@ -44,7 +43,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Função para exibir o ranking de uma rodada específica
     function mostrarRankingDaRodada(numeroRodada) {
         setActiveButton(`Rodada ${numeroRodada}`);
         rankingTitle.textContent = `Classificação da Rodada ${numeroRodada}`;
@@ -52,7 +50,6 @@ document.addEventListener('DOMContentLoaded', () => {
         renderizarRanking(dadosDaRodada, 'rodada');
     }
 
-    // Função para calcular e mostrar a classificação geral
     function mostrarClassificacaoGeral() {
         setActiveButton('Classificação Geral');
         rankingTitle.textContent = 'Classificação Geral';
@@ -65,27 +62,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!classificacaoGeral[time.username]) {
                     classificacaoGeral[time.username] = { pontos: 0, vitorias: 0, eliminacoes: 0 };
                 }
-                // Adiciona pontos com base na posição
                 classificacaoGeral[time.username].pontos += (totalParticipantes - time.rank + 1);
-                // Adiciona uma vitória se ficou em 1º
                 if (time.rank === 1) {
                     classificacaoGeral[time.username].vitorias += 1;
                 }
-                // Soma as eliminações
                 classificacaoGeral[time.username].eliminacoes += time.eliminatedCount;
             });
         });
 
-        // Converte o objeto para um array para poder ordenar
         const rankingArray = Object.keys(classificacaoGeral).map(username => ({
             username,
             ...classificacaoGeral[username]
         }));
 
-        // Ordena por pontos (maior para o menor)
         rankingArray.sort((a, b) => b.pontos - a.pontos);
 
-        // Adiciona a posição (rank) a cada time
         const rankingFinal = rankingArray.map((time, index) => ({
             ...time,
             rank: index + 1
@@ -94,7 +85,6 @@ document.addEventListener('DOMContentLoaded', () => {
         renderizarRanking(rankingFinal, 'geral');
     }
 
-    // Função que desenha o ranking na tela
     function renderizarRanking(dados, tipo) {
         container.innerHTML = '';
         if (!dados || dados.length === 0) {
@@ -102,19 +92,22 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        const totalParticipantes = dados.length;
+
         dados.forEach(item => {
             const itemDiv = document.createElement('div');
             itemDiv.className = 'ranking-item';
             
-            // Lógica para normalizar o nome do arquivo de imagem
             const imageName = item.username.toLowerCase().replace(/ /g, '-').replace(/\./g, '') + '.png';
 
             let detalhesHTML = '';
+            // ### ALTERAÇÃO AQUI ###
             if (tipo === 'rodada') {
+                const pontosDaRodada = totalParticipantes - item.rank + 1;
                 detalhesHTML = `
                     <div class="details">
-                        <span class="details-label">Eliminado por:</span>
-                        <div class="details-value">${item.eliminatedBy}</div>
+                        <span class="details-label">Pontos na Rodada:</span>
+                        <div class="details-value">${pontosDaRodada}</div>
                     </div>`;
             } else if (tipo === 'geral') {
                 detalhesHTML = `
@@ -136,7 +129,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Função para destacar o botão ativo
     function setActiveButton(text) {
         document.querySelectorAll('.btn-rodada').forEach(btn => {
             if (btn.textContent === text) {
@@ -147,6 +139,5 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Inicia o processo
     carregarDadosDeTodasAsRodadas();
 });
