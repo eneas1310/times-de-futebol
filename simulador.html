@@ -160,7 +160,7 @@ canvas {
 
 <script>
 // --- Constantes da Simulação ---
-const INITIAL_RADIUS = 18; 
+const INITIAL_RADIUS = 25; 
 const MAX_RADIUS = 40;
 const MAX_SPEED = 2.0; 
 const MIN_SPEED = 0.5;
@@ -172,6 +172,7 @@ const FINAL_GROWTH_BOOST = 0.02;
 // --- Variáveis Globais ---
 let canvas, ctx, profiles=[], animationFrameId, isGameOver=false, lastTime=0, followerImageUrls=[];
 let finalRankingData = [];
+let rodadaTitle = "CLASSIFICAÇÃO DA RODADA"; // <-- ALTERAÇÃO 1: Variável global adicionada
 let eliminationCounter = 1;
 const imageCache = new Map();
 let grid;
@@ -197,8 +198,8 @@ class Profile {
     update(dt,totalAlive){
         if(!this.alive) return;
         let speedFactor = Math.max(MIN_SPEED, Math.min(MAX_SPEED, Math.pow(followerImageUrls.length / totalAlive, 0.4)));
-        if(totalAlive <= 10) speedFactor *= 1.2; // ### ALTERADO ### Reduzido de 1.5 para 1.2
-        if(totalAlive <= 5) speedFactor *= 1.5;  // ### ALTERADO ### Reduzido de 2.0 para 1.5
+        if(totalAlive <= 10) speedFactor *= 1.2;
+        if(totalAlive <= 5) speedFactor *= 1.5;
         
         if(Math.abs(this.vx)<0.2) this.vx += this.vx>0?0.2:-0.2;
         if(Math.abs(this.vy)<0.2) this.vy += this.vy>0?0.2:-0.2;
@@ -254,6 +255,12 @@ class Profile {
 }
 
 function initProfiles(){
+    // ALTERAÇÃO 2: Pede um título ao usuário no início
+    const userTitle = prompt("Digite o título para esta rodada:", "Classificação da Rodada");
+    if (userTitle) {
+        rodadaTitle = userTitle.toUpperCase();
+    }
+    
     canvas=document.getElementById('collisionCanvas'); ctx=canvas.getContext('2d');
     grid = new SpatialGrid(canvas.width, canvas.height, MAX_RADIUS * 2);
     profiles=[]; isGameOver=false; lastTime=performance.now();
@@ -267,7 +274,6 @@ function initProfiles(){
     document.getElementById('exportRankingButton').style.display = 'none';
     document.getElementById('resetButton').style.display = 'block';
 
-    // Criar perfis posicionados aleatoriamente sem sobreposição inicial.
     for(let i=0;i<followerImageUrls.length;i++){
         const imageObj=followerImageUrls[i];
         let placed=false; let attempts=0;
@@ -279,10 +285,8 @@ function initProfiles(){
             if(!hasOverlap){ placed = true; }
             attempts++;
         }
-        // Se não encontrou posição sem sobreposição após muitas tentativas, cai para posição aleatória (fallback).
         if(!placed){ x = Math.random()*(canvas.width-INITIAL_RADIUS*2)+INITIAL_RADIUS; y = Math.random()*(canvas.height-INITIAL_RADIUS*2)+INITIAL_RADIUS; }
 
-        // Velocidades iniciais levemente aleatórias (evita vx/vy quase zero)
         const vx = (Math.random() - 0.5) * MAX_SPEED * 1.2; 
         const vy = (Math.random() - 0.5) * MAX_SPEED * 1.2; 
 
@@ -348,22 +352,20 @@ function detectCollisions(alive) {
 
 function drawEliminatedLog() {
     ctx.fillStyle = "#ccc";
-    ctx.font = "bold 11px Chakra Petch"; // ### ALTERADO ### Tamanho da fonte diminuído
+    ctx.font = "bold 11px Chakra Petch";
     ctx.textAlign = "left";
     ctx.fillText("Eliminados:", 10, 25);
     
-    ctx.font = "11px Chakra Petch"; // ### ALTERADO ### Tamanho da fonte diminuído
+    ctx.font = "11px Chakra Petch";
     
     eliminatedLog.forEach((name, index) => {
-        const yPos = 45 + index * 14; // ### ALTERADO ### Espaçamento vertical diminuído
+        const yPos = 45 + index * 14;
         
-        // Se a lista de eliminados for muito grande, ela continuará a desenhar para fora da tela.
         if (yPos < canvas.height - 10) { 
              ctx.fillText(name, 10, yPos);
         }
     });
 }
-
 
 function drawFinalRankingList() {
     ctx.fillStyle = "#2c2c54";
@@ -373,7 +375,8 @@ function drawFinalRankingList() {
     ctx.textAlign = "center";
     
     ctx.font = `bold 24px Chakra Petch`;
-    ctx.fillText("CLASSIFICAÇÃO DA RODADA", canvas.width / 2, 30);
+    // ALTERAÇÃO 3: Usa a variável para definir o título
+    ctx.fillText(rodadaTitle, canvas.width / 2, 30);
     
     ctx.font = `bold 14px Chakra Petch`;
     const totalParticipants = finalRankingData.length;
@@ -445,7 +448,6 @@ function drawFinalRankingList() {
     }
     ctx.textBaseline = "alphabetic";
 }
-
 
 function animate(time){
     if(!ctx) return;
